@@ -1,6 +1,26 @@
-import "~/styles/globals.css";
-import type { AppProps } from "next/app";
+import { AppProps } from 'next/app';
+import { ThemeProvider } from 'styled-components';
+import { RecoilRoot } from 'recoil';
+import theme from '~/theme';
+import { GlobalStyle } from '~/theme/GlobalStyle';
+import { useEffect, useState } from 'react';
 
 export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  if (!isClient) {
+    return null;
+  }
+
+  return (
+    <RecoilRoot>
+      <ThemeProvider theme={theme}>
+        <GlobalStyle />
+        <Component {...pageProps} />
+      </ThemeProvider>
+    </RecoilRoot>
+  );
 }

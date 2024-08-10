@@ -1,13 +1,24 @@
 import styled, { css } from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import currentPageState from '~/state/currentPage';
-import LinkBuilder from '../link-builder';
-import Preview from '../preview';
 import NavigationBar from '~/components/organisms/NavigationBar';
+import LinkBuilder from '~/components/pages/link-builder';
+import Preview from '~/components/pages/preview';
+import { useAuth } from '~/hooks/useAuth';
 
 export default function Dashboard() {
+  const { isAuthenticated, isLoading } = useAuth();
+
   const currentPage = useRecoilValue(currentPageState);
   const isPreview = currentPage === 'preview';
+
+  if (isLoading) {
+    return <div>Loading...</div>; // or a loading spinner
+  }
+
+  if (!isAuthenticated) {
+    return null; // The user will be redirected by the useAuth hook
+  }
   return (
     <Container>
       {isPreview && <PreviewBackground />}

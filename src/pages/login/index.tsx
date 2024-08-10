@@ -6,6 +6,7 @@ import Typography from '~/components/atoms/Typography';
 import Input from '~/components/molecules/Input';
 import AuthLayout from '~/components/templates/AuthLayout';
 import AuthWrapper from '~/components/templates/AuthWrapper';
+import { useRouter } from 'next/router';
 
 const text = {
   header: 'Login',
@@ -17,33 +18,65 @@ const text = {
   buttonLabel: 'Login',
   noAccount: `Don't have an account?`,
   createAccount: 'Create account',
+  errorEmail: 'Please enter a valid email address',
+  errorPassword: 'Please enter your password',
+  errorInvalid: 'Invalid email or password',
+  errorGeneral: 'An error occurred. Please try again.',
 };
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const validateForm = () => {
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setError(text.errorEmail);
+      return false;
+    }
+    if (!password) {
+      setError(text.errorPassword);
+      return false;
+    }
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
       if (!response.ok) {
-        throw new Error('Invalid email or password');
+        const errorData = await response.json();
+        throw new Error(errorData.error || text.errorInvalid);
       }
 
-      // Redirect or update state on successful login
-      console.log('Logged in successfully');
+      const data = await response.json();
+      console.log('Logged in successfully', data);
+
+      // Redirect to dashboard on successful login
+      router.push('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError(err.message || text.errorGeneral);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -58,9 +91,11 @@ const Login: React.FC = () => {
         </Header>
         <Main>
           {error && (
-            <Typography color="error" variant="bodyM">
-              {error}
-            </Typography>
+            <ErrorMessage>
+              <Typography color="white" variant="bodyM">
+                {error}
+              </Typography>
+            </ErrorMessage>
           )}
           <form onSubmit={handleSubmit}>
             <Input
@@ -70,6 +105,7 @@ const Login: React.FC = () => {
               placeholder={text.emailPlaceholder}
               value={email}
               onChange={e => setEmail(e.target.value)}
+              disabled={isLoading}
             />
             <Input
               type="password"
@@ -78,8 +114,14 @@ const Login: React.FC = () => {
               placeholder={text.passwordPlaceholder}
               value={password}
               onChange={e => setPassword(e.target.value)}
+              disabled={isLoading}
             />
-            <Button label={text.buttonLabel} width="100%" type="submit" />{' '}
+            <Button
+              label={isLoading ? 'Logging in...' : text.buttonLabel}
+              width="100%"
+              type="submit"
+              disabled={isLoading}
+            />
           </form>
           <div>
             <Typography color="grey" variant="bodyM">
@@ -107,6 +149,16 @@ const Main = styled.div(
     align-items: center;
     gap: ${theme.space('l')};
     margin-top: ${theme.space('xl')};
+  `,
+);
+
+const ErrorMessage = styled.div(
+  ({ theme }) => css`
+    width: 100%;
+    padding: ${theme.space('m')};
+    background-color: ${theme.color('error')};
+    border-radius: ${theme.border('s')};
+    margin-bottom: ${theme.space('m')};
   `,
 );
 

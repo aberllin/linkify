@@ -1,8 +1,6 @@
 import styled, { css } from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import currentPageState from '~/state/currentPage';
-import LinkBuilder from './link-builder';
-import Preview from './preview';
 import NavigationBar from '~/components/organisms/NavigationBar';
 import Link from '~/components/atoms/Link';
 

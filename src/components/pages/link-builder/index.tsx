@@ -4,7 +4,6 @@ import currentSectionState from '~/state/currentSection';
 import Typography from '~/components/atoms/Typography';
 import { css, styled } from 'styled-components';
 import LinksBlock from '~/components/organisms/LinksBlock';
-import ProfileBlock from '../../components/organisms/ProfileBlock';
 import linksState from '~/state/links';
 import { LinkItemProps } from '~/components/organisms/LinksBlock/components/LinkItemBlock';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,6 +11,7 @@ import PreviewBlock from '~/components/organisms/PreviewBlock';
 import isMobileBreakpoint from '~/utils/isMobileBreakpoint';
 import { useEffect } from 'react';
 import profileDetails from '~/state/profileDetails';
+import ProfileBlock from '~/components/organisms/ProfileBlock';
 
 const getEmptyLink = (): LinkItemProps => ({
   key: uuidv4(),
@@ -39,7 +39,7 @@ const LinkBuilder: React.FC = () => {
   useEffect(() => {
     const fetchLinks = async () => {
       try {
-        const response = await fetch('http://localhost:8000/links', {
+        const response = await fetch('/api/links', {
           method: 'GET',
           credentials: 'include', // Include cookies for authentication
           headers: {
@@ -67,32 +67,40 @@ const LinkBuilder: React.FC = () => {
 
   const onDelete = (key: string) =>
     setLinks(prev => prev.filter(link => link.key !== key));
+
   const onSave = async () => {
-    console.log(JSON.stringify({ links }));
     const formattedLinks = links.map(link => ({
-      label: 'Link',
+      label: 'Link', // or whatever label you want
       type: link.type,
       url: link.url,
-      userId: _profileDetails?.userId,
     }));
+
+    console.log('Saving links:', formattedLinks);
+
     try {
-      const response = await fetch('http://localhost:8000/links', {
+      const response = await fetch('/api/links', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ links: formattedLinks }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save links');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save links');
       }
 
-      console.log('Links saved successfully');
+      const data = await response.json();
+      console.log('Links saved successfully:', data);
+      // Maybe update your local state here if needed
     } catch (error) {
       console.error('Error saving links:', error);
+      // Handle the error, maybe show a message to the user
     }
   };
+
   const isMobile = isMobileBreakpoint();
 
   return (

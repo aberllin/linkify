@@ -8,6 +8,10 @@ import Input from '~/components/molecules/Input';
 import AuthWrapper from '~/components/templates/AuthWrapper';
 import { useSetRecoilState } from 'recoil';
 import profileDetails from '~/state/profileDetails';
+import { useRouter } from 'next/router';
+import register from '~/utils/register';
+import isValidEmail from '~/utils/isValidEmail';
+import AuthForm from '~/components/templates/AuthForm';
 
 const text = {
   header: 'Create account',
@@ -25,75 +29,94 @@ const text = {
   errorUsername: 'Username must be at least 3 characters long',
   errorPassword: 'Password must be at least 8 characters long',
   errorPasswordMatch: 'Passwords do not match',
-  errorGeneral: 'An error occurred during registration. Please try again.',
+};
+
+type OnChage = {
+  key: 'email' | 'password' | 'confirmPassword' | 'username';
+  value: string;
 };
 
 const CreateAccountPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [state, setState] = useState<{
+    email: string;
+    username: string;
+    password: string;
+    confirmPassword: string;
+  }>({ email: '', username: '', password: '', confirmPassword: '' });
+
+  const [error, setError] = useState<Partial<
+    Record<
+      'email' | 'username' | 'password' | 'confirmPassword' | 'generic',
+      string
+    >
+  > | null>(null);
   const setProfileDetails = useSetRecoilState(profileDetails);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const validateForm = () => {
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setError(text.errorEmail);
+    const { email, username, password, confirmPassword } = state;
+    if (!email || !isValidEmail(email)) {
+      setError({ email: text.errorEmail });
       return false;
     }
     if (!username || username.length < 3) {
-      setError(text.errorUsername);
+      setError({ username: text.errorUsername });
       return false;
     }
     if (!password || password.length < 8) {
-      setError(text.errorPassword);
+      setError({ password: text.errorPassword });
       return false;
     }
     if (password !== confirmPassword) {
-      setError(text.errorPasswordMatch);
+      setError({ confirmPassword: text.errorPasswordMatch });
       return false;
     }
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const { email, username, password } = state;
     e.preventDefault();
-    setError(''); // Clear any existing errors
+    setError(null);
 
     if (!validateForm()) {
       return;
     }
+    setIsLoading(true);
 
-    try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email, username, password }),
-      });
+    const { error, data } = await register({ email, username, password });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || text.errorGeneral);
-      }
-
-      const data = await response.json();
-      const userId = data.user._id;
-
-      if (userId) {
-        setProfileDetails(prev => {
-          if (!prev) return prev;
-          return { ...prev, userId };
-        });
-      }
-      console.log({ data });
-      console.log('Registered successfully with userId:', userId);
-      // TODO: Redirect to dashboard or show success message
-    } catch (err) {
-      setError(err.message);
+    if (error) {
+      return setError({ generic: error });
     }
+
+    const userId = data.user.id;
+    const userEmail = data.user.email;
+    const userName = data.user.username;
+
+    if (userId) {
+      setProfileDetails(prev => {
+        if (!prev) {
+          return {
+            userId,
+            email: userEmail,
+            userName,
+          };
+        }
+
+        return { ...prev, userId, email: userEmail };
+      });
+    }
+
+    setIsLoading(false);
+    return router.push('/dashboard');
+  };
+
+  const onChange = ({ key, value }: OnChage) => {
+    setError(null);
+    setState(prev => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -106,50 +129,66 @@ const CreateAccountPage: React.FC = () => {
           </Typography>
         </Header>
         <Main>
-          {error && (
+          {error?.generic && (
             <ErrorMessage>
               <Typography color="white" variant="bodyM">
-                {error}
+                {error.generic}
               </Typography>
             </ErrorMessage>
           )}
-          <form onSubmit={handleSubmit}>
+          <AuthForm onSubmit={handleSubmit}>
             <Input
               type="email"
               icon="email"
               label={text.emailLabel}
               placeholder={text.emailPlaceholder}
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              value={state.email}
+              onChange={e => onChange({ key: 'email', value: e.target.value })}
+              errors={error?.email ? [error.email] : undefined}
             />
             <Input
               type="text"
               label="Username"
               placeholder="Enter your username"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              value={state.username}
+              onChange={e =>
+                onChange({ key: 'username', value: e.target.value })
+              }
+              errors={error?.username ? [error.username] : undefined}
             />
             <Input
               type="password"
               icon="password"
               label={text.passwordLabel}
               placeholder={text.passwordPlaceholder}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              value={state.password}
+              onChange={e =>
+                onChange({ key: 'password', value: e.target.value })
+              }
+              errors={error?.password ? [error.password] : undefined}
             />
             <Input
               type="password"
               icon="password"
               label={text.confirmPasswordLabel}
               placeholder={text.passwordPlaceholder}
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
+              value={state.confirmPassword}
+              onChange={e =>
+                onChange({ key: 'confirmPassword', value: e.target.value })
+              }
+              errors={
+                error?.confirmPassword ? [error.confirmPassword] : undefined
+              }
             />
             <Typography color="grey" variant="bodyS">
               {text.passwordRule}
             </Typography>
-            <Button label={text.buttonLabel} width="100%" type="submit" />
-          </form>
+            <Button
+              label={isLoading ? 'Loading...' : text.buttonLabel}
+              width="100%"
+              type="submit"
+            />
+          </AuthForm>
           <div>
             <Typography color="grey" variant="bodyM">
               {text.haveAccount}

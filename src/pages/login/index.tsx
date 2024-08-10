@@ -7,6 +7,8 @@ import Input from '~/components/molecules/Input';
 import AuthLayout from '~/components/templates/AuthLayout';
 import AuthWrapper from '~/components/templates/AuthWrapper';
 import { useRouter } from 'next/router';
+import AuthForm from '~/components/templates/AuthForm';
+import login from '~/utils/login';
 
 const text = {
   header: 'Login',
@@ -25,19 +27,25 @@ const text = {
 };
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [state, setState] = useState<{
+    email: string;
+    password: string;
+  }>({ email: '', password: '' });
+
+  const [error, setError] = useState<Partial<
+    Record<'email' | 'password' | 'generic', string>
+  > | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
+  console.log({ error });
   const validateForm = () => {
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      setError(text.errorEmail);
+    const { email, password } = state;
+    if (email === '' || !/\S+@\S+\.\S+/.test(email)) {
+      setError({ email: text.errorEmail });
       return false;
     }
-    if (!password) {
-      setError(text.errorPassword);
+    if (password === '') {
+      setError({ password: text.errorPassword });
       return false;
     }
     return true;
@@ -45,38 +53,28 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError(null);
+    console.log('here');
+    const { email, password } = state;
 
     if (!validateForm()) {
       return;
     }
 
+    console.log('here');
+
     setIsLoading(true);
 
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }),
-      });
+    const { error, data } = await login({ email, password });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || text.errorInvalid);
-      }
+    if (error) {
+      setError({ generic: error });
+      return setIsLoading(false);
+    }
 
-      const data = await response.json();
-      console.log('Logged in successfully', data);
-
-      // Redirect to dashboard on successful login
-      router.push('/dashboard');
-    } catch (err) {
-      setError(err.message || text.errorGeneral);
-    } finally {
+    if (data) {
       setIsLoading(false);
+      return router.push('/dashboard');
     }
   };
 
@@ -90,31 +88,37 @@ const Login: React.FC = () => {
           </Typography>
         </Header>
         <Main>
-          {error && (
+          {error?.generic && (
             <ErrorMessage>
               <Typography color="white" variant="bodyM">
-                {error}
+                {error.generic}
               </Typography>
             </ErrorMessage>
           )}
-          <form onSubmit={handleSubmit}>
+          <AuthForm onSubmit={handleSubmit}>
             <Input
               type="email"
               icon="email"
               label={text.emailLabel}
               placeholder={text.emailPlaceholder}
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              value={error?.email}
+              onChange={e =>
+                setState(prev => ({ ...prev, email: e.target.value }))
+              }
               disabled={isLoading}
+              errors={error?.email ? [error.email] : undefined}
             />
             <Input
               type="password"
               icon="password"
               label={text.passwordLabel}
               placeholder={text.passwordPlaceholder}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              value={state.password}
+              onChange={e =>
+                setState(prev => ({ ...prev, password: e.target.value }))
+              }
               disabled={isLoading}
+              errors={error?.password ? [error.password] : undefined}
             />
             <Button
               label={isLoading ? 'Logging in...' : text.buttonLabel}
@@ -122,7 +126,7 @@ const Login: React.FC = () => {
               type="submit"
               disabled={isLoading}
             />
-          </form>
+          </AuthForm>
           <div>
             <Typography color="grey" variant="bodyM">
               {text.noAccount}

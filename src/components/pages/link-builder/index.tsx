@@ -9,7 +9,7 @@ import { LinkItemProps } from '~/components/organisms/LinksBlock/components/Link
 import { v4 as uuidv4 } from 'uuid';
 import PreviewBlock from '~/components/organisms/PreviewBlock';
 import isMobileBreakpoint from '~/utils/isMobileBreakpoint';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import profileDetails from '~/state/profileDetails';
 import ProfileBlock from '~/components/organisms/ProfileBlock';
 
@@ -34,7 +34,20 @@ const text = {
 const LinkBuilder: React.FC = () => {
   const currentSection = useRecoilValue(currentSectionState);
   const [links, setLinks] = useRecoilState(linksState);
-  const _profileDetails = useRecoilValue(profileDetails);
+  const [profile, setProfile] = useRecoilState(profileDetails);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const onSave = async () => {
+    setIsSaving(true);
+    try {
+      await Promise.all([saveLinks(), saveProfile()]);
+      console.log('All changes saved successfully');
+    } catch (error) {
+      console.error('Error saving changes:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
   console.log({ links });
   useEffect(() => {
     const fetchLinks = async () => {
@@ -67,8 +80,7 @@ const LinkBuilder: React.FC = () => {
 
   const onDelete = (linkId: string) =>
     setLinks(prev => prev.filter(link => link.id !== linkId));
-
-  const onSave = async () => {
+  const saveLinks = async () => {
     const formattedLinks = links.map(link => ({
       id: link.id,
       label: 'Link',
@@ -95,6 +107,31 @@ const LinkBuilder: React.FC = () => {
       console.log('Links saved successfully');
     } catch (error) {
       console.error('Error saving links:', error);
+      throw error; // Rethrow to be caught in onSave
+    }
+  };
+
+  const saveProfile = async () => {
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(profile),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save profile');
+      }
+
+      const savedProfile = await response.json();
+      setProfile(savedProfile);
+      console.log('Profile saved successfully');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+      throw error; // Rethrow to be caught in onSave
     }
   };
 
@@ -125,7 +162,7 @@ const LinkBuilder: React.FC = () => {
             <ProfileBlock />
           )}
         </PageContent>
-        <SaveFooter onSave={onSave} />
+        <SaveFooter onSave={onSave} loading={isSaving} />
       </PageBlock>
     </Container>
   );

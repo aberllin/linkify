@@ -9,7 +9,13 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   icon?: IconName;
 };
 
-const Input: React.FC<Props> = ({ label, errors, icon, ...rest }) => {
+const Input: React.FC<Props> = ({
+  label,
+  errors,
+  icon,
+  placeholder,
+  ...rest
+}) => {
   const hasErrors = errors && errors.length > 0;
   return (
     <Container>
@@ -24,7 +30,12 @@ const Input: React.FC<Props> = ({ label, errors, icon, ...rest }) => {
             <Icon name={icon} />
           </IconWrapper>
         )}
-        <InputElement $hasErrors={hasErrors} $hasIcon={!!icon} {...rest} />
+        <InputElement
+          $hasErrors={hasErrors}
+          $hasIcon={!!icon}
+          {...rest}
+          placeholder={hasErrors ? undefined : placeholder}
+        />
         {hasErrors && errors[0] && <ErrorMessage>{errors[0]}</ErrorMessage>}
       </InputWrapper>
     </Container>
@@ -79,6 +90,7 @@ const InputElement = styled.input<{ $hasErrors?: boolean; $hasIcon?: boolean }>(
     &::placeholder {
       color: ${theme.color('grey')};
       font-weight: ${theme.fontWeight('regular')};
+      font-size: ${theme.space('base')};
     }
 
     &:focus {

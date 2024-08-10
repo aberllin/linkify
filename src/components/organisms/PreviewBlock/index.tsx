@@ -13,6 +13,10 @@ const PreviewBlock: React.FC<Props> = ({ links }) => {
   const placeholders = new Array(5).fill(null);
   const profileDetails = useRecoilValue(profileDetailsState);
   console.log({ previewBlockLinks: links });
+
+  const email = profileDetails?.email;
+  const image = profileDetails?.image;
+
   return (
     <Container>
       <PhoneFrame>
@@ -20,18 +24,22 @@ const PreviewBlock: React.FC<Props> = ({ links }) => {
         <img src="/images/PhoneFrame.svg" alt="Phone frame" />
         <ContentBlock>
           <ProfileBlock>
-            <ImagePlaceholder $image={profileDetails?.image} />
+            {image ? (
+              <Image src={image} />
+            ) : (
+              <ImagePlaceholder $image={profileDetails?.image} />
+            )}
             <NamePlaceholder />
-            <EmailPlaceholder />
+            {email ? <div>{email}</div> : <EmailPlaceholder />}
           </ProfileBlock>
           <LinksBlock>
             {links.length > 0
               ? links.map(link => (
                   <LinkItem key={link.id} $color={linkData[link.type].color}>
-                    <div>
+                    <LinkItemLabel>
                       <Icon name={linkData[link.type].icon} />
                       {linkData[link.type].label}
-                    </div>
+                    </LinkItemLabel>
                     <Icon name="arrow-right" />
                   </LinkItem>
                 ))
@@ -42,6 +50,14 @@ const PreviewBlock: React.FC<Props> = ({ links }) => {
     </Container>
   );
 };
+
+const LinkItemLabel = styled.div(
+  ({ theme }) => css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.space('base')};
+  `,
+);
 
 const PhoneFrame = styled.div`
   position: relative;
@@ -81,6 +97,15 @@ const ProfileBlock = styled.div(
     justify-content: center;
     align-items: center;
     gap: ${theme.space('base')};
+  `,
+);
+
+const Image = styled.img(
+  ({ theme }) => css`
+    height: 96px;
+    width: 96px;
+    background-color: ${theme.color('placeholder')};
+    border-radius: 50%;
   `,
 );
 

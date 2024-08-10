@@ -3,10 +3,11 @@ import Button from '~/components/atoms/Button';
 
 type Props = {
   onSave: () => void;
+  loading: boolean;
 };
-const SaveFooter: React.FC<Props> = ({ onSave }) => (
+const SaveFooter: React.FC<Props> = ({ onSave, loading }) => (
   <Container>
-    <Button label="Save" onClick={onSave} />
+    <Button onClick={onSave} label={loading ? 'Saving...' : 'Save'} />
   </Container>
 );
 

@@ -1,10 +1,10 @@
 import { atom } from 'recoil';
 
 export type ProfileDetails = {
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
-  image: string;
+  image?: string;
   userId: string;
 };
 

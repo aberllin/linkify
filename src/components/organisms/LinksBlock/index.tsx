@@ -7,7 +7,7 @@ import LinkItemBlock, { LinkItemProps } from './components/LinkItemBlock';
 type Props = {
   onAddLink: () => void;
   links: Array<LinkItemProps>;
-  onDelete: (key: string) => void;
+  onDelete: (linkId: string) => void;
 };
 
 const LinksBlock: React.FC<Props> = ({ onAddLink, links, onDelete }) => (
@@ -36,10 +36,10 @@ const LinksBlock: React.FC<Props> = ({ onAddLink, links, onDelete }) => (
       <Links>
         {links.map((link, index) => (
           <LinkItemBlock
-            key={link.key}
-            linkKey={link.key}
+            key={link.id}
+            linkKey={link.id}
             index={index}
-            onRemove={() => onDelete(link.key)}
+            onRemove={() => onDelete(link.id)}
           />
         ))}
       </Links>

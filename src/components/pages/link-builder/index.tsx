@@ -14,7 +14,7 @@ import profileDetails from '~/state/profileDetails';
 import ProfileBlock from '~/components/organisms/ProfileBlock';
 
 const getEmptyLink = (): LinkItemProps => ({
-  key: uuidv4(),
+  id: uuidv4(),
   url: '',
   type: 'github',
 });
@@ -35,7 +35,7 @@ const LinkBuilder: React.FC = () => {
   const currentSection = useRecoilValue(currentSectionState);
   const [links, setLinks] = useRecoilState(linksState);
   const _profileDetails = useRecoilValue(profileDetails);
-
+  console.log({ links });
   useEffect(() => {
     const fetchLinks = async () => {
       try {
@@ -65,17 +65,16 @@ const LinkBuilder: React.FC = () => {
 
   const onAddNew = () => setLinks(prev => [...prev, getEmptyLink()]);
 
-  const onDelete = (key: string) =>
-    setLinks(prev => prev.filter(link => link.key !== key));
+  const onDelete = (linkId: string) =>
+    setLinks(prev => prev.filter(link => link.id !== linkId));
 
   const onSave = async () => {
     const formattedLinks = links.map(link => ({
-      label: 'Link', // or whatever label you want
+      id: link.id,
+      label: 'Link',
       type: link.type,
       url: link.url,
     }));
-
-    console.log('Saving links:', formattedLinks);
 
     try {
       const response = await fetch('/api/links', {
@@ -88,16 +87,14 @@ const LinkBuilder: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save links');
+        throw new Error('Failed to save links');
       }
 
-      const data = await response.json();
-      console.log('Links saved successfully:', data);
-      // Maybe update your local state here if needed
+      const savedLinks = await response.json();
+      setLinks(savedLinks);
+      console.log('Links saved successfully');
     } catch (error) {
       console.error('Error saving links:', error);
-      // Handle the error, maybe show a message to the user
     }
   };
 

@@ -8,7 +8,7 @@ import { linkData, linkOptions, type LinkType } from '~/constants';
 import { linkByKeyState } from '~/state/links';
 
 export type LinkItemProps = {
-  key: string;
+  id: string;
   url: string;
   type: LinkType;
 };

@@ -11,17 +11,17 @@ export const linkByKeyState = selectorFamily<LinkItemProps | undefined, string>(
   {
     key: 'linkByKeyState',
     get:
-      key =>
+      linkId =>
       ({ get }) => {
         const links = get(linksState);
-        return links.find(link => link.key === key);
+        return links.find(link => link.id === linkId);
       },
     set:
-      key =>
+      linkId =>
       ({ get, set }, newValue) => {
         const links = get(linksState);
         const updatedLinks = links.map(link =>
-          link.key === key ? { ...link, ...newValue } : link,
+          link.id === linkId ? { ...link, ...newValue } : link,
         );
         set(linksState, updatedLinks);
       },

@@ -1,17 +1,21 @@
-import SaveFooter from '~/components/organisms/SaveFooter';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import currentSectionState from '~/state/currentSection';
+import SaveFooter from '~/components/organisms/SaveFooter';
 import Typography from '~/components/atoms/Typography';
-import { css, styled } from 'styled-components';
 import LinksBlock from '~/components/organisms/LinksBlock';
+import PreviewBlock from '~/components/organisms/PreviewBlock';
+import ProfileBlock from '~/components/organisms/ProfileBlock';
+import currentSectionState from '~/state/currentSection';
 import linksState from '~/state/links';
+import profileDetails from '~/state/profileDetails';
+import saveLinks from '~/utils/saveLinks';
+import getLinks from '~/utils/getLinks';
+import saveProfile from '~/utils/saveProfile';
+import isMobileBreakpoint from '~/utils/isMobileBreakpoint';
 import { LinkItemProps } from '~/components/organisms/LinksBlock/components/LinkItemBlock';
 import { v4 as uuidv4 } from 'uuid';
-import PreviewBlock from '~/components/organisms/PreviewBlock';
-import isMobileBreakpoint from '~/utils/isMobileBreakpoint';
-import { useEffect, useState } from 'react';
-import profileDetails from '~/state/profileDetails';
-import ProfileBlock from '~/components/organisms/ProfileBlock';
+import { css, styled } from 'styled-components';
+import { useToast } from '~/hooks/useToast';
 
 const getEmptyLink = (): LinkItemProps => ({
   id: uuidv4(),
@@ -29,103 +33,83 @@ const text = {
     description:
       ' Add/edit/remove links below and then share all your profiles with the world!',
   },
+  successMessage: 'Your changes have been successfully saved!',
 };
 
 const LinkBuilder: React.FC = () => {
   const currentSection = useRecoilValue(currentSectionState);
   const [links, setLinks] = useRecoilState(linksState);
   const [profile, setProfile] = useRecoilState(profileDetails);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const onSave = async () => {
-    setIsSaving(true);
-    try {
-      await Promise.all([saveLinks(), saveProfile()]);
-    } catch (error) {
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  useEffect(() => {
-    const fetchLinks = async () => {
-      try {
-        const response = await fetch('/api/links', {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch links');
-        }
-
-        const data = await response.json();
-        setLinks(data);
-      } catch (error: any) {}
-    };
-
-    fetchLinks();
-  }, []);
-
-  const onAddNew = () => setLinks(prev => [...prev, getEmptyLink()]);
-
-  const onDelete = (linkId: string) =>
-    setLinks(prev => prev.filter(link => link.id !== linkId));
-  const saveLinks = async () => {
-    const formattedLinks = links.map(link => ({
-      id: link.id,
-      label: 'Link',
-      type: link.type,
-      url: link.url,
-    }));
-
-    try {
-      const response = await fetch('/api/links', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ links: formattedLinks }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save links');
-      }
-
-      const savedLinks = await response.json();
-      setLinks(savedLinks);
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const saveProfile = async () => {
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(profile),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save profile');
-      }
-
-      const savedProfile = await response.json();
-      setProfile(savedProfile);
-    } catch (error) {
-      throw error; // Rethrow to be caught in onSave
-    }
-  };
+  const [loading, setLoading] = useState(false);
+  const { addToast } = useToast();
 
   const isMobile = isMobileBreakpoint();
+
+  const handleSetToastMessage = useCallback(
+    (level: 'info' | 'error' | 'success', msg: string) => {
+      addToast(msg, level);
+      setLoading(false);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const getData = async () => {
+      const { data, error } = await getLinks();
+
+      if (error) {
+        return handleSetToastMessage('error', error);
+      }
+
+      if (data) {
+        setLinks(data.links);
+      }
+    };
+
+    getData();
+  }, [setLinks, handleSetToastMessage]);
+
+  const onAddNew = useCallback(() => {
+    setLinks(prev => [...prev, getEmptyLink()]);
+  }, [setLinks]);
+
+  const onDelete = useCallback(
+    (linkId: string) => {
+      setLinks(prev => prev.filter(link => link.id !== linkId));
+    },
+    [setLinks],
+  );
+
+  const onSaveLinks = useCallback(async () => {
+    const { error, data } = await saveLinks({ links });
+
+    if (error) {
+      return handleSetToastMessage('error', error);
+    }
+
+    if (data) {
+      setLinks(data.links);
+    }
+  }, [links, setLinks, handleSetToastMessage]);
+
+  const onSaveProfile = useCallback(async () => {
+    const { data, error } = await saveProfile({ profile });
+
+    if (error) {
+      return handleSetToastMessage('error', error);
+    }
+
+    if (data) {
+      setProfile(data.profile);
+    }
+  }, [profile, setProfile, handleSetToastMessage]);
+
+  const onSave = useCallback(async () => {
+    setLoading(true);
+    await Promise.all([onSaveProfile(), onSaveLinks()]);
+    setLoading(false);
+    handleSetToastMessage('success', text.successMessage);
+  }, [onSaveProfile, onSaveLinks, handleSetToastMessage]);
 
   return (
     <Container>
@@ -152,7 +136,7 @@ const LinkBuilder: React.FC = () => {
             <ProfileBlock />
           )}
         </PageContent>
-        <SaveFooter onSave={onSave} loading={isSaving} />
+        <SaveFooter onSave={onSave} loading={loading} />
       </PageBlock>
     </Container>
   );

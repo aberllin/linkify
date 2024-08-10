@@ -1,5 +1,5 @@
 const text = {
-  errorGeneral: 'An error occurred during registration. Please try again.',
+  errorGeneral: 'An error occurred during logging in. Please try again.',
 };
 
 type Args = {

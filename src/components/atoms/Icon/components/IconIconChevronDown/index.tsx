@@ -9,7 +9,7 @@ const IconIconiconchevrondown = ({ color = 'currentColor' }) => (
     height="9"
     viewBox="0 0 14 9"
   >
-    <path stroke="#633CFF" stroke-width="2" d="m1 1 6 6 6-6" />
+    <path stroke="#633CFF" strokeWidth="2" d="m1 1 6 6 6-6" />
   </svg>
 );
 

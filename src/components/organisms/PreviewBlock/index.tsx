@@ -4,6 +4,7 @@ import { linkData } from '~/constants';
 import Icon from '~/components/atoms/Icon';
 import { useRecoilValue } from 'recoil';
 import profileDetailsState from '~/state/profileDetails';
+import Typography from '~/components/atoms/Typography';
 
 type Props = {
   links: Array<LinkItemProps>;
@@ -37,9 +38,15 @@ const PreviewBlock: React.FC<Props> = ({ links }) => {
                   <LinkItem key={link.id} $color={linkData[link.type].color}>
                     <LinkItemLabel>
                       <Icon name={linkData[link.type].icon} color="white" />
-                      {linkData[link.type].label}
+                      <Typography
+                        variant="label"
+                        color="white"
+                        fontWeight="regular"
+                      >
+                        {linkData[link.type].label}
+                      </Typography>
                     </LinkItemLabel>
-                    <Icon name="arrow_right" />
+                    <Icon name="arrow_right" color="white" />
                   </LinkItem>
                 ))
               : placeholders.map((_, index) => <PlaceholderItem key={index} />)}

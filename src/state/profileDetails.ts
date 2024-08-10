@@ -8,9 +8,9 @@ export type ProfileDetails = {
   userId: string;
 };
 
-const profileDetails = atom<ProfileDetails | null>({
+const profileDetails = atom<ProfileDetails>({
   key: 'profileDetails',
-  default: null,
+  default: { email: '', userId: '' },
 });
 
 export default profileDetails;

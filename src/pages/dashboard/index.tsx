@@ -5,6 +5,7 @@ import NavigationBar from '~/components/organisms/NavigationBar';
 import LinkBuilder from '~/components/pages/link-builder';
 import Preview from '~/components/pages/preview';
 import { useAuth } from '~/hooks/useAuth';
+import Toast from '~/components/molecules/Toast';
 
 export default function Dashboard() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -13,7 +14,7 @@ export default function Dashboard() {
   const isPreview = currentPage === 'preview';
 
   if (isLoading) {
-    return <div>Loading...</div>; // or a loading spinner
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
@@ -26,6 +27,7 @@ export default function Dashboard() {
         <NavigationBar />
         {currentPage === 'links' ? <LinkBuilder /> : <Preview />}
       </MainContent>
+      <Toast />
     </Container>
   );
 }

@@ -9,7 +9,7 @@ const IconIconicondraganddrop = ({ color = 'currentColor' }) => (
     height="6"
     viewBox="0 0 12 6"
   >
-    <path fill="#737373" d="M0 0h12v1H0zM0 5h12v1H0z" />
+    <path fill={color} d="M0 0h12v1H0zM0 5h12v1H0z" />
   </svg>
 );
 

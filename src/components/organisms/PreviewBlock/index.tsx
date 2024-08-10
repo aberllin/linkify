@@ -12,7 +12,7 @@ type Props = {
 const PreviewBlock: React.FC<Props> = ({ links }) => {
   const placeholders = new Array(5).fill(null);
   const profileDetails = useRecoilValue(profileDetailsState);
-
+  console.log({ previewBlockLinks: links });
   return (
     <Container>
       <PhoneFrame>
@@ -27,7 +27,7 @@ const PreviewBlock: React.FC<Props> = ({ links }) => {
           <LinksBlock>
             {links.length > 0
               ? links.map(link => (
-                  <LinkItem key={link.key} $color={linkData[link.type].color}>
+                  <LinkItem key={link.id} $color={linkData[link.type].color}>
                     <div>
                       <Icon name={linkData[link.type].icon} />
                       {linkData[link.type].label}

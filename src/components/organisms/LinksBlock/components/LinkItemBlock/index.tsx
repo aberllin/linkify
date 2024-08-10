@@ -36,7 +36,7 @@ const LinkItemBlock: React.FC<Props> = ({ index, linkKey, onRemove }) => {
     <Container>
       <Header>
         <DragAndDrop>
-          <Icon name="drag-and-drop" />
+          <Icon name="drag_and_drop" />
           <Typography variant="label" color="grey">
             Link #{index + 1}
           </Typography>

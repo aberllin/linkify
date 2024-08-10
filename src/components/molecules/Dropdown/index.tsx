@@ -62,7 +62,7 @@ const Dropdown = <T,>({
             <Placeholder>{placeholder}</Placeholder>
           )}
         </DropdownLabel>
-        <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} />
+        <Icon name={isOpen ? 'chevron_up' : 'chevron_down'} />
       </DropdownHeader>
       {isOpen && (
         <DropdownList>

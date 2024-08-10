@@ -37,7 +37,7 @@ const Login: React.FC = () => {
   > | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  console.log({ error });
+
   const validateForm = () => {
     const { email, password } = state;
     if (email === '' || !/\S+@\S+\.\S+/.test(email)) {
@@ -54,14 +54,12 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    console.log('here');
+
     const { email, password } = state;
 
     if (!validateForm()) {
       return;
     }
-
-    console.log('here');
 
     setIsLoading(true);
 

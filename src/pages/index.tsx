@@ -1,7 +1,4 @@
 import styled, { css } from 'styled-components';
-import { useRecoilValue } from 'recoil';
-import currentPageState from '~/state/currentPage';
-import NavigationBar from '~/components/organisms/NavigationBar';
 import Link from '~/components/atoms/Link';
 
 export default function Home() {

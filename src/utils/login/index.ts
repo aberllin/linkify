@@ -35,7 +35,7 @@ const login = async ({ email, password }: Args): Promise<ReturnType> => {
       error = text.errorGeneral;
     } else {
       const responseData = await response.json();
-      console.log(responseData);
+
       data = {
         user: {
           email: responseData.user.email,

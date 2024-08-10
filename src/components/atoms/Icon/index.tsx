@@ -1,37 +1,18 @@
 import React from 'react';
+import icons from './components';
+import type { SystemColorPalette } from '~/theme';
 
-export type IconName =
-  | 'arrow-right'
-  | 'changes-saved'
-  | 'chevron-down'
-  | 'chevron-up'
-  | 'codepen'
-  | 'codewars'
-  | 'devto'
-  | 'drag-and-drop'
-  | 'email'
-  | 'facebook'
-  | 'freecodecamp'
-  | 'frontend-mentor'
-  | 'github'
-  | 'gitlab'
-  | 'hashnode'
-  | 'link-copied-to-clipboard'
-  | 'link'
-  | 'linkedin'
-  | 'links-header'
-  | 'password'
-  | 'preview-header'
-  | 'profile-details-header'
-  | 'stack-overflow'
-  | 'twitch'
-  | 'twitter'
-  | 'upload-image'
-  | 'youtube';
+export type IconName = keyof typeof icons;
 
-const Icon: React.FC<{ name: IconName }> = ({ name }) => (
-  // eslint-disable-next-line @next/next/no-img-element
-  <img src={`/images/icon-${name}.svg`} alt={name} />
-);
+type Props = {
+  name: IconName;
+  color?: keyof SystemColorPalette;
+};
+
+const Icon: React.FC<Props> = ({ name, color = 'lightGrey' }) => {
+  const Icon = icons[name];
+
+  return <Icon color={color} />;
+};
 
 export default Icon;

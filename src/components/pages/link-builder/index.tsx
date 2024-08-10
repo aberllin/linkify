@@ -41,20 +41,18 @@ const LinkBuilder: React.FC = () => {
     setIsSaving(true);
     try {
       await Promise.all([saveLinks(), saveProfile()]);
-      console.log('All changes saved successfully');
     } catch (error) {
-      console.error('Error saving changes:', error);
     } finally {
       setIsSaving(false);
     }
   };
-  console.log({ links });
+
   useEffect(() => {
     const fetchLinks = async () => {
       try {
         const response = await fetch('/api/links', {
           method: 'GET',
-          credentials: 'include', // Include cookies for authentication
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -66,11 +64,7 @@ const LinkBuilder: React.FC = () => {
 
         const data = await response.json();
         setLinks(data);
-        // setLoading(false);
-      } catch (error: any) {
-        console.log(error.message);
-        // setLoading(false);
-      }
+      } catch (error: any) {}
     };
 
     fetchLinks();
@@ -104,10 +98,8 @@ const LinkBuilder: React.FC = () => {
 
       const savedLinks = await response.json();
       setLinks(savedLinks);
-      console.log('Links saved successfully');
     } catch (error) {
-      console.error('Error saving links:', error);
-      throw error; // Rethrow to be caught in onSave
+      throw error;
     }
   };
 
@@ -128,9 +120,7 @@ const LinkBuilder: React.FC = () => {
 
       const savedProfile = await response.json();
       setProfile(savedProfile);
-      console.log('Profile saved successfully');
     } catch (error) {
-      console.error('Error saving profile:', error);
       throw error; // Rethrow to be caught in onSave
     }
   };

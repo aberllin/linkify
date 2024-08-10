@@ -47,7 +47,7 @@ const ImageUploader: React.FC<Props> = ({
               <ImageWrapper>
                 <Image src={image} alt="Uploaded Image" />
                 <Overlay>
-                  <UploadIcon name="upload-image" />
+                  <UploadIcon name="upload_image" />
                   <Typography variant="bodyM" color="white">
                     Change Image
                   </Typography>
@@ -55,7 +55,7 @@ const ImageUploader: React.FC<Props> = ({
               </ImageWrapper>
             ) : (
               <UploadPlaceholder>
-                <Icon name="upload-image" />
+                <Icon name="upload_image" />
                 <Typography variant="h2" color="purple">
                   + Upload Image
                 </Typography>

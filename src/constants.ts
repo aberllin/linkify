@@ -33,7 +33,7 @@ export const linkData: { [key in LinkType]: LinkData } = {
   },
   frontendMentor: {
     label: 'Frontend Mentor',
-    icon: 'frontend-mentor',
+    icon: 'frontend_mentor',
     color: '#3F3D56',
     placeholder: 'https://www.frontendmentor.io/profile/username',
   },
@@ -105,7 +105,7 @@ export const linkData: { [key in LinkType]: LinkData } = {
   },
   stackoverflow: {
     label: 'Stack Overflow',
-    icon: 'stack-overflow',
+    icon: 'stack_overflow',
     color: '#F48024',
     placeholder: 'https://stackoverflow.com/users/userid/username',
   },

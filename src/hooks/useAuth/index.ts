@@ -1,4 +1,3 @@
-// hooks/useAuth.ts
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -11,7 +10,7 @@ export function useAuth() {
     async function checkAuth() {
       try {
         const response = await fetch('/api/dashboard', {
-          credentials: 'include', // Important for including cookies
+          credentials: 'include',
         });
         if (response.ok) {
           setIsAuthenticated(true);
@@ -19,7 +18,6 @@ export function useAuth() {
           router.push('/login');
         }
       } catch (error) {
-        console.error('Auth check failed', error);
         router.push('/login');
       } finally {
         setIsLoading(false);

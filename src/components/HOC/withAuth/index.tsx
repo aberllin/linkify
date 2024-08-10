@@ -1,4 +1,3 @@
-// components/withAuth.tsx
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -25,7 +24,6 @@ export default function withAuth<P extends object>(
             router.push('/login');
           }
         } catch (error) {
-          console.error('Auth check failed', error);
           setAuthState('unauthenticated');
           router.push('/login');
         }

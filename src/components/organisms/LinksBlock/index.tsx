@@ -55,6 +55,7 @@ const Links = styled.div(
     flex-direction: column;
     max-height: 500px;
     overflow-y: scroll;
+    height: 100vh;
   `,
 );
 

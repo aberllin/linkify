@@ -16,7 +16,7 @@ const text = {
 
 const tabs: Array<{ key: Section; label: string; icon: IconName }> = [
   { key: 'links', label: 'Links', icon: 'link' },
-  { key: 'profile', label: 'Profile Details', icon: 'profile-details-header' },
+  { key: 'profile', label: 'Profile Details', icon: 'profile_details_header' },
 ];
 
 const NavigationBar: React.FC = () => {
@@ -39,7 +39,7 @@ const NavigationBar: React.FC = () => {
           />
           <Button
             appearance="secondary"
-            label={isMobile ? <Icon name="preview-header" /> : text.preview}
+            label={isMobile ? <Icon name="preview_header" /> : text.preview}
             onClick={() => setCurrentPage('preview')}
           />
         </>
